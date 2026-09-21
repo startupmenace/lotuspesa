@@ -30,10 +30,15 @@ app.use('/api/mpesa/b2c', b2cRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/config', apiKeyAuth, configRoutes);
 
-const publicDir = path.join(__dirname, '..', 'public');
+const publicDir = path.join(process.cwd(), 'public');
 app.use(express.static(publicDir));
 app.get('*', (_req, res) => {
-  res.sendFile(path.join(publicDir, 'index.html'));
+  const indexPath = path.join(publicDir, 'index.html');
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      res.status(200).json({ message: 'M-Pesa API running', api: '/api' });
+    }
+  });
 });
 
 app.use(errorHandler);
