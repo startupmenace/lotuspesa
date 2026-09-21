@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Transaction {
+  id                 String     @id @default(uuid())
+  externalId         String     @unique
+  type               String
+  amount             Float
+  phoneNumber        String
+  shortcode          String
+  status             String     @default("pending")
+  mpesaReceiptNumber String?
+  checkoutRequestId  String?
+  conversationId     String?
+  resultCode         String?
+  resultDescription  String?
+  accountReference   String?
+  transactionDesc    String?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  callbacks          Callback[]
+  refunds            Refund[]
+
+  @@index([status])
+  @@index([type])
+  @@index([phoneNumber])
+  @@index([createdAt])
+}
+
+model Callback {
+  id            String      @id @default(uuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  type          String
+  rawPayload    String
+  processed     Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+}
+
+model Refund {
+  id                  String      @id @default(uuid())
+  originalTransactionId String
+  originalTransaction  Transaction @relation(fields: [originalTransactionId], references: [id])
+  amount              Float
+  phoneNumber         String
+  status              String      @default("pending")
+  conversationId      String?
+  mpesaReceiptNumber  String?
+  resultCode          String?
+  resultDescription   String?
+  deviceReturnTime    DateTime
+  initiatedBy         String
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  @@index([status])
+}
+
+model Config {
+  id                 String @id @default(uuid())
+  consumerKey        String
+  consumerSecret     String
+  shortcode          String
+  passkey            String
+  initiatorName      String?
+  securityCredential  String?
+  environment        String @default("sandbox")
+  stkCallbackUrl     String
+  c2bConfirmationUrl String
+  c2bValidationUrl   String
+  b2cResultUrl       String
+  b2cTimeoutUrl      String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}

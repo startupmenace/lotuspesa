@@ -1,0 +1,12 @@
+[package]
+name = "mpesa-backend"
+version = "1.0.0"
+description = "M-Pesa Integration API"
+
+[dependencies]
+"wasmer/edgejs" = "1.0"
+
+[[commands]]
+name = "start"
+module = "wasmer/edgejs"
+runner = "https://wasmer.io/wasmer/edgejs:1.0"

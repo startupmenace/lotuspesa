@@ -1,0 +1,12 @@
+[package]
+name = "mpesa-dashboard"
+version = "1.0.0"
+description = "M-Pesa Monitoring Dashboard"
+
+[dependencies]
+"wasmer/static-web-server" = "1.0"
+
+[[commands]]
+name = "serve"
+module = "wasmer/static-web-server"
+args = ["--port", "8080", "--root", "dist"]
