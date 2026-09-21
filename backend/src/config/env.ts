@@ -1,6 +1,4 @@
-import dotenv from 'dotenv';
-
-dotenv.config();
+try { require('dotenv').config(); } catch {}
 
 export const env = {
   MPESA_ENVIRONMENT: process.env.MPESA_ENVIRONMENT || 'sandbox',

@@ -38,14 +38,14 @@ app.get('*', (_req, res) => {
 
 app.use(errorHandler);
 
-initDb().then(() => {
-  app.listen(env.PORT, () => {
-    console.log('M-Pesa API running on port ' + env.PORT);
-    console.log('Environment: ' + env.MPESA_ENVIRONMENT);
+app.listen(env.PORT, () => {
+  console.log('M-Pesa API running on port ' + env.PORT);
+  console.log('Environment: ' + env.MPESA_ENVIRONMENT);
+  initDb().then(() => {
+    console.log('Database initialized successfully');
+  }).catch(err => {
+    console.error('Database init failed (non-fatal):', err.message || err);
   });
-}).catch(err => {
-  console.error('Failed to initialize database:', err);
-  process.exit(1);
 });
 
 export default app;
