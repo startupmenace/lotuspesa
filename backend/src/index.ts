@@ -1,10 +1,7 @@
 import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
 import path from 'path';
 import { env } from './config/env';
 import { initDb } from './config/database';
-import { apiLimiter } from './middleware/rateLimit';
 import { errorHandler } from './middleware/error';
 import { apiKeyAuth } from './middleware/auth';
 import stkRoutes from './routes/mpesa/stk.routes';
@@ -15,10 +12,7 @@ import configRoutes from './routes/config.routes';
 
 const app = express();
 
-app.use(helmet());
-app.use(cors());
 app.use(express.json());
-app.use(apiLimiter);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -33,12 +27,7 @@ app.use('/api/config', apiKeyAuth, configRoutes);
 const publicDir = path.join(process.cwd(), 'public');
 app.use(express.static(publicDir));
 app.get('*', (_req, res) => {
-  const indexPath = path.join(publicDir, 'index.html');
-  res.sendFile(indexPath, (err) => {
-    if (err) {
-      res.status(200).json({ message: 'M-Pesa API running', api: '/api' });
-    }
-  });
+  res.sendFile(path.join(publicDir, 'index.html'));
 });
 
 app.use(errorHandler);
