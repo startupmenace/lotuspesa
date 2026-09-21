@@ -4,9 +4,10 @@ version = "1.0.0"
 description = "M-Pesa Integration API + Monitoring Dashboard"
 
 [dependencies]
-"wasmer/edgejs" = "1.0"
+"wasmer/edgejs" = "0.0.2"
 
 [[commands]]
 name = "start"
 module = "wasmer/edgejs"
-runner = "https://wasmer.io/wasmer/edgejs:1.0"
+runner = "https://wasmer.io/wasmer/edgejs:0.0.2"
+main-args = ["dist/index.js"]

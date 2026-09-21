@@ -1,3 +1,5 @@
-kind: wasmer.io/App.v0
 name: lotuspesa
-package: fortune/lotuspesa
+app_id: da_RxJIdtAUg6Mx
+owner: fortune
+package: .
+kind: wasmer.io/App.v0

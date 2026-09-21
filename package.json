@@ -2,12 +2,16 @@
   "name": "lotuspesa",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
-    "dev:backend": "cd backend && npm run dev",
-    "dev:frontend": "cd frontend && npm run dev",
-    "build": "node build.mjs",
-    "start": "cd backend && node dist/index.js",
-    "deploy": "wasmer deploy"
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.14.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.1.0",
+    "zod": "^3.23.8"
   }
 }

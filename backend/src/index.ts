@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import path from 'path';
 import { env } from './config/env';
-import { prisma } from './config/database';
+import { initDb } from './config/database';
 import { apiLimiter } from './middleware/rateLimit';
 import { errorHandler } from './middleware/error';
 import { apiKeyAuth } from './middleware/auth';
@@ -24,18 +24,12 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// M-Pesa callback routes (no auth - called by Safaricom)
 app.use('/api/mpesa/stk', stkRoutes);
 app.use('/api/mpesa/c2b', c2bRoutes);
 app.use('/api/mpesa/b2c', b2cRoutes);
-
-// Dashboard routes
 app.use('/api/dashboard', dashboardRoutes);
-
-// Config routes (protected)
 app.use('/api/config', apiKeyAuth, configRoutes);
 
-// Serve frontend static files in production
 const publicDir = path.join(__dirname, '..', 'public');
 app.use(express.static(publicDir));
 app.get('*', (_req, res) => {
@@ -44,9 +38,14 @@ app.get('*', (_req, res) => {
 
 app.use(errorHandler);
 
-app.listen(env.PORT, () => {
-  console.log('M-Pesa API running on port ' + env.PORT);
-  console.log('Environment: ' + env.MPESA_ENVIRONMENT);
+initDb().then(() => {
+  app.listen(env.PORT, () => {
+    console.log('M-Pesa API running on port ' + env.PORT);
+    console.log('Environment: ' + env.MPESA_ENVIRONMENT);
+  });
+}).catch(err => {
+  console.error('Failed to initialize database:', err);
+  process.exit(1);
 });
 
 export default app;

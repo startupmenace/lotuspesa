@@ -1,8 +1,7 @@
 import { Router, Request, Response } from 'express';
-import { getTransactions, getStats } from '../services/transaction.service';
+import { getTransactions, getStats, getTransactionById } from '../services/transaction.service';
 import { getRefunds } from '../services/refund.service';
 import { notifications } from '../services/notification.service';
-import { prisma } from '../config/database';
 import { apiKeyAuth } from '../middleware/auth';
 
 const router = Router();
@@ -37,16 +36,8 @@ router.get('/transactions', async (req: Request, res: Response) => {
 
 router.get('/transactions/:id', async (req: Request, res: Response) => {
   try {
-    const transaction = await prisma.transaction.findUnique({
-      where: { id: req.params.id },
-      include: { callbacks: true, refunds: true },
-    });
-
-    if (!transaction) {
-      res.status(404).json({ error: 'Transaction not found' });
-      return;
-    }
-
+    const transaction = await getTransactionById(req.params.id);
+    if (!transaction) { res.status(404).json({ error: 'Transaction not found' }); return; }
     res.json(transaction);
   } catch (error) {
     console.error('Transaction detail error:', error);
@@ -69,21 +60,13 @@ router.get('/refunds', async (req: Request, res: Response) => {
   }
 });
 
-// SSE stream - use query param for auth since EventSource cant send headers
 router.get('/stream', (req: Request, res: Response) => {
   const apiKey = req.query.key;
   const { env } = require('../config/env');
-  if (apiKey !== env.API_KEY) {
-    res.status(401).json({ error: 'Unauthorized' });
-    return;
-  }
-
+  if (apiKey !== env.API_KEY) { res.status(401).json({ error: 'Unauthorized' }); return; }
   const clientId = 'client-' + ++sseCounter;
   notifications.addClient(clientId, res);
-
-  req.on('close', () => {
-    notifications.removeClient(clientId);
-  });
+  req.on('close', () => { notifications.removeClient(clientId); });
 });
 
 export default router;
