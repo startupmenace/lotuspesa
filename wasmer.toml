@@ -1,5 +1,5 @@
 [package]
-name = "fortune/lotuspesa"
+name = "fortune/lotuspesa-edge"
 version = "1.0.0"
 description = "M-Pesa Integration API + Monitoring Dashboard"
 

@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
-import { getDb } from '../config/database';
+import { executeSql } from '../config/database';
 
 const router = Router();
 
@@ -23,19 +23,18 @@ const configSchema = z.object({
 
 router.get('/', async (_req: Request, res: Response) => {
   try {
-    const db = getDb();
-    let result = await db.execute('SELECT * FROM Config LIMIT 1');
+    let result = await executeSql('SELECT * FROM Config LIMIT 1');
 
     if (result.rows.length === 0) {
-      await db.execute({
-        sql: `INSERT INTO Config (id, consumerKey, consumerSecret, shortcode, passkey, initiatorName, securityCredential, environment, stkCallbackUrl, c2bConfirmationUrl, c2bValidationUrl, b2cResultUrl, b2cTimeoutUrl)
+      await executeSql(
+        `INSERT INTO Config (id, consumerKey, consumerSecret, shortcode, passkey, initiatorName, securityCredential, environment, stkCallbackUrl, c2bConfirmationUrl, c2bValidationUrl, b2cResultUrl, b2cTimeoutUrl)
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        args: [newId(), process.env.MPESA_CONSUMER_KEY||'', process.env.MPESA_CONSUMER_SECRET||'', process.env.MPESA_SHORTCODE||'', process.env.MPESA_PASSKEY||'', process.env.MPESA_INITIATOR_NAME||'', process.env.MPESA_SECURITY_CREDENTIAL||'', process.env.MPESA_ENVIRONMENT||'sandbox', process.env.MPESA_STK_CALLBACK_URL||'', process.env.MPESA_C2B_CONFIRMATION_URL||'', process.env.MPESA_C2B_VALIDATION_URL||'', process.env.MPESA_B2C_RESULT_URL||'', process.env.MPESA_B2C_TIMEOUT_URL||''],
-      });
-      result = await db.execute('SELECT * FROM Config LIMIT 1');
+        [newId(), process.env.MPESA_CONSUMER_KEY||'', process.env.MPESA_CONSUMER_SECRET||'', process.env.MPESA_SHORTCODE||'', process.env.MPESA_PASSKEY||'', process.env.MPESA_INITIATOR_NAME||'', process.env.MPESA_SECURITY_CREDENTIAL||'', process.env.MPESA_ENVIRONMENT||'sandbox', process.env.MPESA_STK_CALLBACK_URL||'', process.env.MPESA_C2B_CONFIRMATION_URL||'', process.env.MPESA_C2B_VALIDATION_URL||'', process.env.MPESA_B2C_RESULT_URL||'', process.env.MPESA_B2C_TIMEOUT_URL||''],
+      );
+      result = await executeSql('SELECT * FROM Config LIMIT 1');
     }
 
-    const config = result.rows[0] as any;
+    const config = result.rows[0];
     res.json({ ...config, consumerSecret: config.consumerSecret ? '***' + config.consumerSecret.slice(-4) : '', passkey: config.passkey ? '***' + config.passkey.slice(-4) : '', securityCredential: config.securityCredential ? '***' + config.securityCredential.slice(-4) : '' });
   } catch (error) {
     console.error('Get config error:', error);
@@ -46,8 +45,7 @@ router.get('/', async (_req: Request, res: Response) => {
 router.put('/', async (req: Request, res: Response) => {
   try {
     const body = configSchema.parse(req.body);
-    const db = getDb();
-    const existing = await db.execute('SELECT * FROM Config LIMIT 1');
+    const existing = await executeSql('SELECT * FROM Config LIMIT 1');
 
     if (existing.rows.length > 0) {
       const updates: Record<string, string> = {};
@@ -56,13 +54,13 @@ router.put('/', async (req: Request, res: Response) => {
         updates[key] = value;
       }
       const sets = Object.keys(updates).map(k => `"${k}" = ?`).join(', ');
-      await db.execute({ sql: `UPDATE Config SET ${sets}, updatedAt = datetime('now') WHERE id = ?`, args: [...Object.values(updates), (existing.rows[0] as any).id] });
+      await executeSql(`UPDATE Config SET ${sets}, updatedAt = datetime('now') WHERE id = ?`, [...Object.values(updates), existing.rows[0].id]);
     } else {
-      await db.execute({
-        sql: `INSERT INTO Config (id, consumerKey, consumerSecret, shortcode, passkey, initiatorName, securityCredential, environment, stkCallbackUrl, c2bConfirmationUrl, c2bValidationUrl, b2cResultUrl, b2cTimeoutUrl)
+      await executeSql(
+        `INSERT INTO Config (id, consumerKey, consumerSecret, shortcode, passkey, initiatorName, securityCredential, environment, stkCallbackUrl, c2bConfirmationUrl, c2bValidationUrl, b2cResultUrl, b2cTimeoutUrl)
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        args: [newId(), body.consumerKey, body.consumerSecret, body.shortcode, body.passkey, body.initiatorName, body.securityCredential, body.environment, body.stkCallbackUrl, body.c2bConfirmationUrl, body.c2bValidationUrl, body.b2cResultUrl, body.b2cTimeoutUrl],
-      });
+        [newId(), body.consumerKey, body.consumerSecret, body.shortcode, body.passkey, body.initiatorName, body.securityCredential, body.environment, body.stkCallbackUrl, body.c2bConfirmationUrl, body.c2bValidationUrl, body.b2cResultUrl, body.b2cTimeoutUrl],
+      );
     }
 
     process.env.MPESA_CONSUMER_KEY = body.consumerKey;

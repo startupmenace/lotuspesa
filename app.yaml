@@ -1,5 +1,21 @@
-name: lotuspesa
-app_id: da_RxJIdtAUg6Mx
+name: lotuspesa-new
+app_id: da_RvJI4t0UNvva
 owner: fortune
 package: .
 kind: wasmer.io/App.v0
+annotations:
+  anybuild.run/config:
+    commands:
+      start: node dist/index.js
+    edgejs_enable: true
+    edgejs_precompile: true
+    name: out
+    node_install_inputs:
+    - package.json
+    node_package_manager: npm
+    node_package_name: lotuspesa
+    node_remove_native_binaries: true
+    node_server: express
+  anybuild.run/provider: node
+  anybuild.run/version: 0.28.4
+  wasmer.io/version: 7.4.1
