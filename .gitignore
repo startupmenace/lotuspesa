@@ -4,6 +4,7 @@ build/
 .env
 backend/prisma/dev.db
 backend/prisma/dev.db-journal
+backend/public/
 *.log
 .DS_Store
 frontend/.env

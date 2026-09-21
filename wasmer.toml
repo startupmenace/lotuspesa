@@ -1,0 +1,12 @@
+[package]
+name = "fortune/lotuspesa"
+version = "1.0.0"
+description = "M-Pesa Integration API + Monitoring Dashboard"
+
+[dependencies]
+"wasmer/edgejs" = "1.0"
+
+[[commands]]
+name = "start"
+module = "wasmer/edgejs"
+runner = "https://wasmer.io/wasmer/edgejs:1.0"

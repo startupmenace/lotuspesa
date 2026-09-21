@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import path from 'path';
 import { env } from './config/env';
 import { prisma } from './config/database';
 import { apiLimiter } from './middleware/rateLimit';
@@ -33,6 +34,13 @@ app.use('/api/dashboard', dashboardRoutes);
 
 // Config routes (protected)
 app.use('/api/config', apiKeyAuth, configRoutes);
+
+// Serve frontend static files in production
+const publicDir = path.join(__dirname, '..', 'public');
+app.use(express.static(publicDir));
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(publicDir, 'index.html'));
+});
 
 app.use(errorHandler);
 
